@@ -13,6 +13,9 @@ dependencies = [
     "langchain-weaviate>=0.0.6",
     "langgraph>=1.2.0",
     "pre-commit>=4.6.0",
+    "pypdf>=6.11.0",
+    "reranker>=0.2.3",
+    "rerankers>=0.10.0",
     "sentence-transformers>=5.5.0",
     "torch==2.5.1",
     "weaviate-client>=4.21.0",
@@ -50,6 +53,10 @@ disallow_untyped_defs = true
 disallow_incomplete_defs = true
 check_untyped_defs = true
 disallow_untyped_decorators = true
+explicit_package_bases = true
+plugins = [
+    "pydantic.mypy"
+]
 
 [tool.bandit]
 exclude_dirs = ["tests", "venv", ".venv"]

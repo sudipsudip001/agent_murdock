@@ -13,3 +13,6 @@ wheels/
 
 papers/
 DIAGRAMS/
+
+.mypy_cache/
+.ruff_cache/

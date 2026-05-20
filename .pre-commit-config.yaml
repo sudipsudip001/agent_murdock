@@ -12,7 +12,7 @@ repos:
     rev: v1.10.0
     hooks:
       - id: mypy
-        additional_dependencies: [types-requests, types-redis, types-PyYAML]
+        additional_dependencies: [pydantic>=2.0.0, types-requests, types-redis, types-PyYAML]
         args: [--strict, --ignore-missing-imports]
 
   # Security scanning
