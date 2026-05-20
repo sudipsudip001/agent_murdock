@@ -91,14 +91,18 @@ class Weaver:
         )
 
     def return_similar_docs(self, query: str) -> list[Document]:
-        if not self.docs:
+        if not self.client.collections.exists("Documents"):
             raise RuntimeError(
-                "Database has not been woven yet. Call weave_database()."
+                "Collection 'Documents' doesn't exist. Call weave_database() and ingest_chunks() first."
             )
-        response = self.docs.query.near_text(
+
+        collection = self.client.collections.get("Documents")
+
+        response = collection.query.near_text(
             query=query,
-            limit=1,
+            limit=10,
         )
+
         return [
             Document(
                 page_content=obj.properties["content"],

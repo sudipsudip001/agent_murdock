@@ -22,7 +22,7 @@ class Generator:
         self.model = model
         self.client = genai.Client(
             api_key=os.getenv("GEMINI_API_KEY"),
-            http_options={"timeout": 30000},
+            http_options={"timeout": 50000},
         )
         self.system_prompt = """
             Role: You are a helpful assistant that answers questions using ONLY the provided context.
