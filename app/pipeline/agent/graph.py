@@ -1,6 +1,9 @@
+from typing import cast
+
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.graph import END, StateGraph
 
+from app.models.response import GenResponse
 from app.pipeline.agent.nodes import Nodes
 from app.pipeline.agent.state import RAGState
 
@@ -38,13 +41,13 @@ class Graph:
         )
         return workflow.compile()
 
-    def run(self, question: str) -> str:
+    def run(self, question: str) -> GenResponse:
         result = self.app.invoke(
             {
                 "question": question,
                 "documents": [],
-                "generation": "",
+                "generation": None,
                 "iterations": 0,
             }
         )
-        return str(result["generation"])
+        return cast(GenResponse, result["generation"])

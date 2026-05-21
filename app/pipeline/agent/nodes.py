@@ -1,11 +1,21 @@
+import logging
+import os
 from typing import Any
 
+from google import genai
+from google.genai import types
 from langchain_core.documents import Document
 from langchain_google_genai import ChatGoogleGenerativeAI
 
+from app.models.response import Citation, GenResponse, RAGResponse, TokenUsage
 from app.pipeline.agent.state import RAGState
 from app.pipeline.ranker import Ranker
 from app.pipeline.weaver import Weaver
+
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(name)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 class Nodes:
@@ -67,16 +77,61 @@ class Nodes:
         new_question = self.llm.invoke(prompt).content.strip()
         return {"question": new_question, "iterations": state.get("iterations", 0) + 1}
 
-    ### USE THE GENERATOR FROM YOUR NORMAL RAG INTERFACE.
-    def generate(self, state: RAGState) -> dict[str, Any]:
+    def generate(self, state: RAGState) -> dict[str, GenResponse]:
+        system_prompt = """
+            Role: You are a helpful assistant that answers questions using ONLY the provided context.
+            Rules:
+                - Cite sources inline using [1], [2], etc. after every claim.
+                - Only include sources you actually cited inline.
+                - Synthesize information in your own words.
+                - citations must be ordered by citation number.
+                - If the context lacks enough information, say so in the answer field.
+                - If the answer isn't present in the context, set answer to: THE ANSWER COULDN'T BE FOUND IN THE CONTEXT.
+            The JSON must have exactly this structure:
+            {
+                "answer": "your answer with inline citations like [1], [2]",
+                "citations": [
+                    {"src": "source", "page": page_num},
+                    {"src": "source", "page": page_num},
+                ]
+            }
+        """
+        GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+        client = genai.Client(
+            api_key=GEMINI_API_KEY,
+            http_options={"timeout": 50000},
+        )
         context = "\n\n---\n\n".join(doc.page_content for doc in state["documents"])
-        prompt = f"""Answer the question using only the context below.
-        If the context doesn't contain enough information, say so clearly.
-        Context:
-        {context}
-        Question: {state['question']}"""
-        answer = self.llm.invoke(prompt).content
-        return {"generation": answer}
+        user_prompt = f"Context:\n{context}\n\nQuestion: {state["question"]}"
+        logger.debug(f"THE FINAL USER PROMPT IS GIVEN AS: {user_prompt}")
+
+        response = client.models.generate_content(
+            model="gemini-3.5-flash",
+            config=types.GenerateContentConfig(
+                system_instruction=system_prompt,
+                temperature=0.1,
+                response_mime_type="application/json",
+                response_schema=RAGResponse,
+            ),
+            contents=[user_prompt],
+        )
+        parsed_response = response.parsed
+        usage = response.usage_metadata
+
+        logger.debug(f"The final parsed response is given as: {parsed_response}")
+        gen_response = GenResponse(
+            response=parsed_response.answer,
+            citations={
+                str(i + 1): Citation(src=p.src, page=p.page)
+                for i, p in enumerate(parsed_response.citations)
+            },
+            token_use=TokenUsage(
+                prompt_token_count=getattr(usage, "prompt_token_count", 0),
+                total_token_count=getattr(usage, "total_token_count", 0),
+            ),
+        )
+
+        return {"generation": gen_response}
 
     # --4. Conditional Edge Logic-----------------------------------
     def decide_after_grading(
