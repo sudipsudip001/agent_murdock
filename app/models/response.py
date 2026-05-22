@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class TokenUsage(BaseModel):
@@ -7,13 +7,13 @@ class TokenUsage(BaseModel):
 
 
 class Citation(BaseModel):
-    src: str
-    page: int
+    src: str = Field(description="The source document name")
+    page: int = Field(description="The page number")
 
 
 class RAGResponse(BaseModel):
-    answer: str
-    citations: list[Citation]
+    answer: str = Field(description="Answer with inline citations like [1], [2]")
+    citations: list[Citation] = Field(description="List of cited sources")
 
 
 class GenResponse(BaseModel):

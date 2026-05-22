@@ -24,7 +24,7 @@ class Graph:
             temperature=0,
         )
         llm_with_tools = llm.bind_tools(TOOLS)
-        self.nodes = Nodes(llm=llm_with_tools)
+        self.nodes = Nodes(llm=llm_with_tools, base_llm=llm)
         self.app = self._build()
 
     def _build(self) -> StateGraph:
