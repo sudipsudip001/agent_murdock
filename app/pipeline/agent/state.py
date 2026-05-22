@@ -1,12 +1,8 @@
-from typing import TypedDict
+from typing import Annotated, TypedDict
 
-from langchain_core.documents import Document
+from langchain_core.messages import BaseMessage
+from langgraph.graph.message import add_messages
 
-from app.models.response import GenResponse
 
-
-class RAGState(TypedDict):
-    question: str
-    documents: list[Document]
-    generation: GenResponse | None
-    iterations: int
+class AgentState(TypedDict):
+    messages: Annotated[list[BaseMessage], add_messages]
