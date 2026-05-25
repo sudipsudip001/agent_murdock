@@ -1,7 +1,5 @@
 from langchain_core.documents import Document
 
-from app.dependencies import reranker
-
 
 class Ranker:
     def __init__(
@@ -15,6 +13,8 @@ class Ranker:
         query: str,
         num_final_docs: int = 3,
     ) -> list[Document]:
+        from app.dependencies import reranker
+
         print("===> Reranking documents...")
         doc_texts = [doc.page_content for doc in initial_docs]
         rerank_results = reranker.rank(query=query, docs=doc_texts)
