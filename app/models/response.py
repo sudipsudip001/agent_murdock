@@ -20,3 +20,9 @@ class GenResponse(BaseModel):
     response: str
     citations: dict[str, Citation]
     token_use: TokenUsage
+
+
+class Context(BaseModel):
+    title: str
+    url: str
+    text: str

@@ -43,10 +43,10 @@ class Graph:
         workflow.add_edge("tools", "agent")
         return workflow.compile()
 
-    def run(self, question: str) -> str:
+    async def run(self, question: str) -> str:
         from langchain_core.messages import HumanMessage
 
-        result = self.app.invoke({"messages": [HumanMessage(content=question)]})
+        result = await self.app.ainvoke({"messages": [HumanMessage(content=question)]})
 
         last_message = result["messages"][-1]
         content = last_message.content
