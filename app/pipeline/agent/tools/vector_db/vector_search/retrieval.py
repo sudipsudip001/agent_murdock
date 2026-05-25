@@ -1,3 +1,5 @@
+import logging
+
 from langchain_core.documents import Document
 from langchain_core.tools import tool
 
@@ -8,8 +10,14 @@ weaver = Weaver()
 ranker = Ranker()
 
 
+logging.basicConfig(
+    level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(name)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
+
+
 @tool  # type: ignore[misc]
-def retrieve(query: str) -> dict[str, list[Document]]:
+def retrieve(query: str) -> list[Document]:
     """
     Search the knowledge base for documents relevant to the query.
     Use this whenever you need to find information to answer a question.
@@ -23,4 +31,4 @@ def retrieve(query: str) -> dict[str, list[Document]]:
         query=query,
         num_final_docs=3,
     )
-    return {"documents": docs}
+    return docs

@@ -3,6 +3,7 @@ import logging
 from typing import Any
 
 import trafilatura
+from langchain_core.documents import Document
 from langchain_core.tools import tool
 from rerankers import Reranker
 
@@ -29,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 @tool  # type: ignore[misc]
-async def SearchWeb(query: str) -> dict[str, Any]:
+async def SearchWeb(query: str) -> list[Document] | dict[str, Any]:
     """
     Search the web for current or factual information. Use this when the user asks about
     recent events, specific facts, or anything not covered by internal knowledge.
@@ -171,7 +172,19 @@ async def SearchWeb(query: str) -> dict[str, Any]:
         if not final_docs:
             return {"error": "No page content could be extracted"}
 
+        langchain_docs = []
+        for doc in final_docs:
+            langchain_docs.append(
+                Document(
+                    page_content=doc["text"],
+                    metadata={
+                        "title": doc["title"],
+                        "url": doc["url"],
+                    },
+                )
+            )
+
         # 7. RETURNING THE CONTEXT THAT CONTAINS THE ANSWERS
-        return {"final_docs": final_docs}
+        return langchain_docs
     except Exception as e:
         return {"error": f"An error occured: {e}"}
