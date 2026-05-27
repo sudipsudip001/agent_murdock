@@ -1,10 +1,21 @@
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 
 from app.dependencies import graph
 from app.models.request import QuestionRequest
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    await graph.setup()
+    yield
+    await graph.teardown()
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 @app.get("/")  # type: ignore[misc]
@@ -13,9 +24,15 @@ def root_message() -> dict[str, str]:
 
 
 @app.post("/ask")  # type: ignore[misc]
-async def ask_question(question: QuestionRequest) -> dict[str, str]:
-    answer = await graph.run(question=question.question)
-    return {"answer": answer}
+async def ask_question(payload: QuestionRequest) -> dict[str, str]:
+    try:
+        answer = await graph.run(
+            question=payload.question,
+            thread_id=payload.thread_id,
+        )
+        return {"answer": answer}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 if __name__ == "__main__":
