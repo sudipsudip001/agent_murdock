@@ -1,0 +1,116 @@
+[
+  {
+    "input": "Who's the winner of premier league 2020?",
+    "expected_tools": [
+      { "name": "web_search" }
+    ]
+  },
+  {
+    "input": "When does the FIFA world cup 2026 start?",
+    "expected_tools": [
+      { "name": "web_search" }
+    ]
+  },
+  {
+    "input": "Who is the current Prime Minister of Nepal?",
+    "expected_tools": [
+      { "name": "web_search" }
+    ]
+  },
+  {
+    "input": "What was the reason of Gen Z protest in Nepal?",
+    "expected_tools": [
+      { "name": "web_search" }
+    ]
+  },
+  {
+    "input": "Is Cole Palmer selected for the FIFA world cup 2026?",
+    "expected_tools": [
+      { "name": "web_search" }
+    ]
+  },
+  {
+    "input": "Which AI field is gaining more popularity in 2026?",
+    "expected_tools": [
+      { "name": "web_search" }
+    ]
+  },
+  {
+    "input": "Did Romeo really love Juliet?",
+    "expected_tools": [
+      { "name": "web_search" }
+    ]
+  },
+  {
+    "input": "What's the price of petrol in Nepal today?",
+    "expected_tools": [
+      { "name": "web_search" }
+    ]
+  },
+  {
+    "input": "What is Gharbari referred to?",
+    "expected_tools": [
+      { "name": "vector_search" }
+    ]
+  },
+  {
+    "input": "What is the meaning of harbor in the crime department?",
+    "expected_tools": [
+      { "name": "vector_search" }
+    ]
+  },
+  {
+    "input": "What are mentioned in the right to religion?",
+    "expected_tools": [
+      { "name": "vector_search" }
+    ]
+  },
+  {
+    "input": "What is the meaning of Thado inquiry?",
+    "expected_tools": [
+      { "name": "vector_search" }
+    ]
+  },
+  {
+    "input": "What is mentioned in the personal freedom?",
+    "expected_tools": [
+      { "name": "vector_search" }
+    ]
+  },
+  {
+    "input": "What is Guthi?",
+    "expected_tools": [
+      { "name": "vector_search" }
+    ]
+  },
+  {
+    "input": "Who does Kipat refer to?",
+    "expected_tools": [
+      { "name": "vector_search" }
+    ]
+  },
+  {
+    "input": "What is the meaning of Tenant?",
+    "expected_tools": [
+      { "name": "vector_search" }
+    ]
+  },
+  {
+    "input": "What does Jimidari refer to and what's it's situation currently?",
+    "expected_tools": [
+      { "name": "vector_search" }
+    ]
+  },
+  {
+    "input": "What is the meaning of Chaklabandi and what are the provisions on it?",
+    "expected_tools": [
+      { "name": "vector_search" }
+    ]
+  },
+  {
+    "input": "What is Baksauni?",
+    "expected_tools": [
+      { "name": "vector_search" }
+    ]
+  }
+]

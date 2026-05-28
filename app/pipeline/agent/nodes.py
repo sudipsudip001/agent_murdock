@@ -24,6 +24,9 @@ SYSTEM_PROMPT = """
         - For each citation, identify whether the source is a web result or a document:
             * Web source  → include "type": "web",  "title", "url".
             * Document    → include "type": "document", "src" (file path), and "page"
+        - retrieved_contexts must be a list of the raw text chunks/passages you were
+          given as context, exactly as they were provided to you. Include every chunk
+          you received, not just the ones you cited.
     You MUST respond with ONLY valid JSON. No explanation, no markdown, no code fences.
     Use exactly this structure:
     {
@@ -31,6 +34,10 @@ SYSTEM_PROMPT = """
         "citations": [
             {"type": "web",      "title": "Article title", "url": "https://...",},
             {"type": "document", "src": "../PDF_DOCS/example.pdf", "page": 3}
+        ],
+        "retrieved_contexts": [
+            "Raw text of chunk 1 as provided to you...",
+            "Raw text of chunk 2 as provided to you..."
         ]
     }
 """
@@ -43,6 +50,10 @@ RETRY_PROMPT = """
         "citations": [
             {"type": "web",      "title": "Article title", "url": "https://..."},
             {"type": "document", "src": "../PDF_DOCS/example.pdf", "page": 3}
+        ],
+        "retrieved_contexts": [
+            "Raw text of chunk 1 as provided to you...",
+            "Raw text of chunk 2 as provided to you..."
         ]
     }
 """
