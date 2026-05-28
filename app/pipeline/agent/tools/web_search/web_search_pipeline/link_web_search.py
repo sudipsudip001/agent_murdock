@@ -1,22 +1,16 @@
 import asyncio
 import logging
-import os
 from typing import Any, cast
 from urllib.parse import urlparse
 
 import httpx
-from dotenv import load_dotenv
 from fastapi import HTTPException
 
-load_dotenv()
+from app.config import EMAIL, SERPER_API_KEY, SERPER_URL
 
-EMAIL = os.getenv("EMAIL")
 logger = logging.getLogger(__name__)
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("httpcore").setLevel(logging.WARNING)
-
-SERPER_API_KEY = os.getenv("SERPER_API_KEY")
-SERPER_URL = "https://google.serper.dev/search"
 
 
 class LinkWebSearch:
@@ -36,7 +30,6 @@ class LinkWebSearch:
         async with httpx.AsyncClient(follow_redirects=True) as client:
             resp = await client.get(url, headers=headers)
             resp.raise_for_status()
-            # If we ended up at Wikipedia after a redirect, use the API instead
             final = str(resp.url)
             if "wikipedia.org" in final and "/wiki/" in final:
                 title = urlparse(final).path.replace("/wiki/", "")

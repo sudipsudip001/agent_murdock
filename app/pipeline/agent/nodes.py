@@ -5,6 +5,9 @@ from typing import Any, cast
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 
+from app.memory.episodes import search_episodes
+from app.memory.extractor import extract_memory
+from app.memory.preferences import load_preferences, save_preferences
 from app.pipeline.agent.state import AgentState
 
 logging.basicConfig(
@@ -135,3 +138,35 @@ class Nodes:
                         "citations": [],
                     }
         return {"messages": [AIMessage(content=json.dumps(fallback))]}
+
+    async def memory_load_node(self, state: AgentState) -> dict[str, Any]:
+        """Runs at session start. Loads prefs + relevant episodes into state."""
+        user_id = state.get("user_id", "default")
+        last_message = state["messages"][-1].content if state["messages"] else ""
+
+        prefs = await load_preferences(user_id)
+        episodes = await search_episodes(user_id, query=last_message, limit=3)
+
+        return {
+            "loaded_memory": {"preferences": prefs, "episodes": episodes},
+            "session_turn_count": state.get("session_turn_count", 0) + 1,
+        }
+
+    async def memory_save_node(self, state: AgentState) -> dict[Any, Any]:
+        """Runs at session end. Extracts memory from conversation and saves it."""
+        user_id = state.get("user_id", "default")
+        messages = state["messages"]
+
+        extracted = await extract_memory(messages)
+
+        for pref in extracted.get("preferences", []):
+            await save_preferences(
+                user_id=user_id,
+                category=pref["category"],
+                key=pref["key"],
+                value=pref["value"],
+                confidence=pref.get("confidence", 0.8),
+                source="inferred",
+            )
+
+        return {}

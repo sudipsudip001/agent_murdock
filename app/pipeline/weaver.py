@@ -6,6 +6,8 @@ from langchain_core.documents import Document
 from weaviate import WeaviateClient
 from weaviate.classes.config import Configure, DataType, Property
 
+from app.config import WEAVIATE_URL
+
 
 class Weaver:
     def __init__(self) -> None:
@@ -36,9 +38,7 @@ class Weaver:
         for attempt in range(max_retries):
             try:
                 self._client = weaviate.connect_to_local(
-                    headers={
-                        "X-Ollama-Api-Endpoint": "http://host.docker.internal:11434"
-                    }
+                    headers={"X-Ollama-Api-Endpoint": WEAVIATE_URL}
                 )
                 assert self._client is not None
                 if self._client.is_ready():
@@ -78,7 +78,7 @@ class Weaver:
             name=collection_name,
             vector_config=Configure.Vectors.text2vec_ollama(
                 model="nomic-embed-text",
-                api_endpoint="http://host.docker.internal:11434",
+                api_endpoint=WEAVIATE_URL,
                 vectorize_collection_name=False,
             ),
             properties=[

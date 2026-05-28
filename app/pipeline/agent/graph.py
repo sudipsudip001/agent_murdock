@@ -1,5 +1,4 @@
 import logging
-import os
 from typing import cast
 
 from langchain_core.messages import HumanMessage, RemoveMessage
@@ -9,6 +8,7 @@ from langgraph.graph import END, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 
+from app.config import GEMINI_API_KEY, POSTGRES_URI
 from app.pipeline.agent.nodes import Nodes
 from app.pipeline.agent.state import AgentState
 from app.pipeline.agent.tools import TOOLS
@@ -25,12 +25,11 @@ class Graph:
     def __init__(self) -> None:
         llm = ChatGoogleGenerativeAI(
             model="gemini-2.5-flash",
-            google_api_key=os.getenv("GEMINI_API_KEY"),
+            google_api_key=GEMINI_API_KEY,
             temperature=0,
         )
         llm_with_tools = llm.bind_tools(TOOLS)
         self.nodes = Nodes(llm=llm_with_tools, base_llm=llm)
-        self.postgres_uri = os.getenv("POSTGRES_URI")
         self.app: CompiledStateGraph | None = None
         self._checkpointer_ctx = None
 
@@ -61,18 +60,22 @@ class Graph:
         workflow.add_node("filter_messages", self.filter_messages)
         workflow.add_node("agent", self.nodes.agent)
         workflow.add_node("tools", ToolNode(TOOLS))
-        workflow.set_entry_point("filter_messages")
+        workflow.add_node("memory_load", self.nodes.memory_load_node)
+        workflow.add_node("memory_save", self.nodes.memory_save_node)
+        workflow.set_entry_point("memory_load")
+        workflow.add_edge("memory_load", "filter_messages")
         workflow.add_edge("filter_messages", "agent")
         workflow.add_conditional_edges(
             "agent",
             tools_condition,
-            {"tools": "tools", END: END},
+            {"tools": "tools", END: "memory_save"},
         )
         workflow.add_edge("tools", "agent")
+        workflow.add_edge("memory_save", END)
         return workflow.compile(checkpointer=checkpointer)
 
     async def setup(self) -> None:
-        self._checkpointer_ctx = AsyncPostgresSaver.from_conn_string(self.postgres_uri)
+        self._checkpointer_ctx = AsyncPostgresSaver.from_conn_string(POSTGRES_URI)
         assert self._checkpointer_ctx is not None
         checkpointer = await self._checkpointer_ctx.__aenter__()
         await checkpointer.setup()

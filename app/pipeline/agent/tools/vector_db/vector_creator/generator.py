@@ -1,11 +1,10 @@
 import logging
-import os
 
-from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from langchain_core.documents import Document
 
+from app.config import GEMINI_API_KEY
 from app.models.response import Citation, GenResponse, RAGResponse, TokenUsage
 
 logging.basicConfig(
@@ -13,15 +12,12 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-load_dotenv()
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
 
 class Generator:
     def __init__(self, model: str = "gemini-2.5-flash-lite") -> None:
         self.model = model
         self.client = genai.Client(
-            api_key=os.getenv("GEMINI_API_KEY"),
+            api_key=GEMINI_API_KEY,
             http_options={"timeout": 50000},
         )
         self.system_prompt = """
