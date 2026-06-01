@@ -1,22 +1,12 @@
 import asyncio
-import logging
-import os
 from typing import Any, cast
 from urllib.parse import urlparse
 
 import httpx
-from dotenv import load_dotenv
 from fastapi import HTTPException
 
-load_dotenv()
-
-EMAIL = os.getenv("EMAIL")
-logger = logging.getLogger(__name__)
-logging.getLogger("httpx").setLevel(logging.WARNING)
-logging.getLogger("httpcore").setLevel(logging.WARNING)
-
-SERPER_API_KEY = os.getenv("SERPER_API_KEY")
-SERPER_URL = "https://google.serper.dev/search"
+from app.config import EMAIL, SERPER_API_KEY, SERPER_URL
+from app.dependencies import logger
 
 
 class LinkWebSearch:

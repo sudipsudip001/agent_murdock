@@ -1,38 +1,36 @@
 import json
-import logging
 from typing import Any, cast
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 
+from app.dependencies import logger
 from app.pipeline.agent.state import AgentState
 
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(name)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
-
-
 SYSTEM_PROMPT = """
-    Role: You are a helpful assistant that answers questions using ONLY the provided context.
-    Rules:
+    Role: You are a research assistant. You MUST use your tools to find information
+    before answering any question.
+
+    Workflow (strictly follow this order):
+        1. ALWAYS call `search_vector` first to check internal documents.
+        2. If the vector search is insufficient, ALSO call `search_web` for current information.
+        3. ONLY after collecting tool results, synthesize an answer from that context.
+        4. If tools return no relevant results, then and only then say the answer couldn't be found.
+
+    Response format (after tools have been called):
         - Cite sources inline using [1], [2], etc. after EVERY factual claim.
         - Only include sources in citations[] that you actually cited inline.
-        - If the context lacks is insufficient, say so in the answer field.
-        - If the answer isn't present in the context, set answer to exactly:
-            "THE ANSWER COULDN'T BE FOUND IN THE CONTEXT."
-        - For each citation, identify whether the source is a web result or a document:
-            * Web source  → include "type": "web",  "title", "url".
-            * Document    → include "type": "document", "src" (file path), and "page"
-    You MUST respond with ONLY valid JSON. No explanation, no markdown, no code fences.
-    Use exactly this structure:
+
+    You MUST respond with ONLY valid JSON in this exact structure:
     {
         "answer": "your answer with inline citations like [1], [2]",
         "citations": [
-            {"type": "web",      "title": "Article title", "url": "https://...",},
+            {"type": "web",      "title": "Article title", "url": "https://..."},
             {"type": "document", "src": "../PDF_DOCS/example.pdf", "page": 3}
         ]
     }
+
+    CRITICAL: Never answer a question without first calling at least one tool.
 """
 
 RETRY_PROMPT = """
@@ -97,9 +95,14 @@ class Nodes:
         messages = [SystemMessage(content=SYSTEM_PROMPT)] + state["messages"]
         response = self.llm.invoke(messages)
 
+        logger.info(f"LLM response tool calls: {response.tool_calls}")
+        logger.info(f"LLM response content preview: {str(response.content)[:200]}")
+
         if response.tool_calls:
             logger.info("Tool call detected, routing to tools node.")
             return {"messages": [response]}
+
+        logger.warning(f"No tool calls made. Raw response content: {response.content}")
 
         current_messages = messages
         for attempt in range(self.max_retries):

@@ -1,15 +1,12 @@
-import os
 from datetime import date
 
-from dotenv import load_dotenv
 from fastapi import HTTPException
 from google import genai
 from google.api_core import exceptions
 from google.genai import types
 from pydantic import BaseModel
 
-load_dotenv()
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+from app.config import GEMINI_API_KEY
 
 
 class QueryExpansion(BaseModel):

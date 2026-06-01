@@ -4,8 +4,10 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI, HTTPException
 
-from app.dependencies import graph
 from app.models.request import QuestionRequest
+from app.pipeline.agent.graph import Graph
+
+graph = Graph()
 
 
 @asynccontextmanager

@@ -6,6 +6,8 @@ from langchain_core.documents import Document
 from weaviate import WeaviateClient
 from weaviate.classes.config import Configure, DataType, Property
 
+from app.dependencies import logger
+
 
 class Weaver:
     def __init__(self) -> None:
@@ -42,10 +44,12 @@ class Weaver:
                 )
                 assert self._client is not None
                 if self._client.is_ready():
-                    print("Weaviate is ready.")
+                    logger.debug("Weaviate is ready.")
                     return self._client
             except Exception as e:
-                print(f"Attempt {attempt + 1}/{max_retries}: Weaviate not ready - {e}")
+                logger.debug(
+                    f"Attempt {attempt + 1}/{max_retries}: Weaviate not ready - {e}"
+                )
                 time.sleep(delay)
         raise RuntimeError("Weaviate didn't become ready in time.")
 

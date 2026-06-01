@@ -1,5 +1,4 @@
 import asyncio
-import logging
 from typing import Any
 
 import trafilatura
@@ -7,6 +6,7 @@ from langchain_core.documents import Document
 from langchain_core.tools import tool
 from rerankers import Reranker
 
+from app.dependencies import logger
 from app.models.response import Context
 from app.pipeline.agent.tools.web_search.web_search_pipeline.chunker import Chunker
 from app.pipeline.agent.tools.web_search.web_search_pipeline.link_deduplicator import (
@@ -22,11 +22,6 @@ from app.pipeline.agent.tools.web_search.web_search_pipeline.query_expander impo
     QueryExpander,
 )
 from app.pipeline.agent.tools.web_search.web_search_pipeline.rank import Rank
-
-logging.basicConfig(
-    level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(name)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
 
 
 @tool  # type: ignore[misc]
@@ -127,7 +122,7 @@ async def SearchWeb(query: str) -> list[Document] | dict[str, Any]:
         if not context_data:
             return {"error": "No page content could be extracted"}
 
-        print(f"ALL THE CONTEXT DATA HAS BEEN GENERATED {context_data}")
+        logger.debug(f"ALL THE CONTEXT DATA HAS BEEN GENERATED {context_data}")
 
         context_list = [
             Context(
@@ -137,7 +132,7 @@ async def SearchWeb(query: str) -> list[Document] | dict[str, Any]:
             )
             for doc in context_data
         ]
-        print(f"HERE'S THE FINAL PRODUCED CONTEXT_LIST: {context_list}")
+        logger.debug(f"HERE'S THE FINAL PRODUCED CONTEXT_LIST: {context_list}")
 
         # 4 CHUNK THE DATA
         chunker = Chunker(chunk_size=500, chunk_overlap=50)

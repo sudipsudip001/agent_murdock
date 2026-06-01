@@ -1,5 +1,7 @@
 from rerankers import Reranker
 
+from app.dependencies import logger
+
 
 class Rank:
     def __init__(
@@ -14,7 +16,7 @@ class Rank:
         query: str,
         num_final_docs: int = 3,
     ) -> list[dict[str, str]]:
-        print("===> Reranking documents...")
+        logger.debug("===> Reranking documents...")
 
         doc_texts = [doc["text"] for doc in initial_docs]
 
