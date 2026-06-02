@@ -144,7 +144,7 @@ async def extract_memory(messages: list[BaseMessage]) -> dict[str, Any]:
         logger.info(
             f"Extraction complete: {len(preferences)} preferences, {len(entities)} entities"
         )
-        return {"preferences": preferences, "entites": entities}
+        return {"preferences": preferences, "entities": entities}
 
     except (json.JSONDecodeError, ValueError) as e:
         logger.error(f"Memory extraction falied to parse JSON: {e}")

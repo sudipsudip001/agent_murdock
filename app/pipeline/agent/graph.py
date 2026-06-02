@@ -9,6 +9,8 @@ from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 
 from app.config import GEMINI_API_KEY, POSTGRES_URI
+from app.db.migrations import run_migrations
+from app.memory.episodes import ensure_collection_exists
 from app.pipeline.agent.nodes import Nodes
 from app.pipeline.agent.state import AgentState
 from app.pipeline.agent.tools import TOOLS
@@ -75,6 +77,14 @@ class Graph:
         return workflow.compile(checkpointer=checkpointer)
 
     async def setup(self) -> None:
+        await run_migrations()
+        # Ensure Episodes collection exists in Weaviate for episodic memory
+        try:
+            ensure_collection_exists()
+            logger.info("Weaviate Episodes collection ensured.")
+        except Exception as e:
+            logger.error(f"Failed to ensure Episodes collection in Weaviate: {e}")
+
         self._checkpointer_ctx = AsyncPostgresSaver.from_conn_string(POSTGRES_URI)
         assert self._checkpointer_ctx is not None
         checkpointer = await self._checkpointer_ctx.__aenter__()

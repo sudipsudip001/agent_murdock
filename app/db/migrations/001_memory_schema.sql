@@ -1,12 +1,12 @@
 CREATE EXTENSION IF NOT EXISTS vector;
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     user_id     TEXT PRIMARY KEY,
     created_at  TIMESTAMPTZ DEFAULT NOW(),
     metadata    JSONB DEFAULT '{}'
 );
 
-CREATE TABLE user_preferences (
+CREATE TABLE IF NOT EXISTS user_preferences (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id             TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     category            TEXT NOT NULL,
@@ -21,11 +21,11 @@ CREATE TABLE user_preferences (
     UNIQUE (user_id, category, key)
 );
 
-CREATE INDEX idx_prefs_user_id ON user_preferences(user_id);
-CREATE INDEX idx_prefs_category ON user_preferences(user_id, category);
-CREATE INDEX idx_prefs_confidence ON user_preferences(user_id, confidence DESC);
+CREATE INDEX IF NOT EXISTS idx_prefs_user_id ON user_preferences(user_id);
+CREATE INDEX IF NOT EXISTS idx_prefs_category ON user_preferences(user_id, category);
+CREATE INDEX IF NOT EXISTS idx_prefs_confidence ON user_preferences(user_id, confidence DESC);
 
-CREATE TABLE user_entities (
+CREATE TABLE IF NOT EXISTS user_entities (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id             TEXT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     entity_type         TEXT NOT NULL,
@@ -37,10 +37,10 @@ CREATE TABLE user_entities (
     UNIQUE (user_id, entity_type, entity_name)
 );
 
-CREATE INDEX idx_entities_user_id ON user_entities(user_id);
-CREATE INDEX idx_entities_type    ON user_entities(user_id, entity_type);
+CREATE INDEX IF NOT EXISTS idx_entities_user_id ON user_entities(user_id);
+CREATE INDEX IF NOT EXISTS idx_entities_type    ON user_entities(user_id, entity_type);
 
-CREATE TABLE memory_extraction_log (
+CREATE TABLE IF NOT EXISTS memory_extraction_log (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id         TEXT NOT NULL REFERENCES users(user_id),
     session_id      TEXT NOT NULL,           -- LangGraph thread_id

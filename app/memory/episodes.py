@@ -2,6 +2,7 @@ import logging
 from datetime import UTC, datetime
 from typing import Any
 
+from app.config import WEAVIATE_URL
 from app.db.weaviate_client import get_weaviate_client
 
 logger = logging.getLogger(__name__)
@@ -24,7 +25,11 @@ def ensure_collection_exists() -> None:
 
     client.collections.create(
         name=COLLECTION_NAME,
-        vectorizer_config=Configure.Vectorizer.text2vec_google,
+        vector_config=Configure.Vectors.text2vec_ollama(
+            model="nomic-embed-text",
+            api_endpoint=WEAVIATE_URL,
+            vectorize_collection_name=False,
+        ),
         properties=[
             Property(name="user_id", data_type=DataType.TEXT),
             Property(name="session_id", data_type=DataType.TEXT),

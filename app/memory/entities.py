@@ -25,7 +25,7 @@ async def load_entities(
                 """
                     SELECT entity_type, entity_name, attributes, mention_count, last_seen_at
                     FROM user_entities
-                    WHERE user_id = $1 AND entity_name = $2
+                    WHERE user_id = $1 AND entity_type = $2
                     ORDER BY mention_count DESC
                 """,
                 user_id,
@@ -74,4 +74,4 @@ async def save_entity(
             entity_name,
             attributes_json,
         )
-        logger.debug(f"Saved entity: [{entity_type}] {entity_name} for user {user_id}")
+    logger.debug(f"Saved entity: [{entity_type}] {entity_name} for user {user_id}")
