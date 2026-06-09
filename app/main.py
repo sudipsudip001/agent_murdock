@@ -4,7 +4,8 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI, HTTPException
 
-from app.models.request import QuestionRequest
+from app.models.request import QuestionRequest, ResumeRequest
+from app.models.response import RunResult
 from app.pipeline.agent.graph import Graph
 
 graph = Graph()
@@ -26,13 +27,23 @@ def root_message() -> dict[str, str]:
 
 
 @app.post("/ask")  # type: ignore[misc]
-async def ask_question(payload: QuestionRequest) -> dict[str, str]:
+async def ask_question(payload: QuestionRequest) -> RunResult:
     try:
-        answer = await graph.run(
+        return await graph.run(
             question=payload.question,
             thread_id=payload.thread_id,
         )
-        return {"answer": answer}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@app.post("/resume")  # type: ignore[misc]
+async def resume_question(payload: ResumeRequest) -> RunResult:
+    try:
+        return await graph.resume(
+            thread_id=payload.thread_id,
+            decision=payload.decision,
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 

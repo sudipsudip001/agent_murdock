@@ -18,3 +18,5 @@ DIAGRAMS/
 .ruff_cache/
 
 .cache_ggshield
+
+.deepeval/

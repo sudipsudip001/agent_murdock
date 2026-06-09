@@ -1,3 +1,5 @@
+from typing import Any, Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -26,3 +28,10 @@ class Context(BaseModel):
     title: str
     url: str
     text: str
+
+
+class RunResult(BaseModel):
+    status: Literal["complete", "awaiting_review"]
+    answer: str | None = None
+    citations: list[dict[str, Any]] | None = None
+    review_required: dict[str, Any] | None = None
